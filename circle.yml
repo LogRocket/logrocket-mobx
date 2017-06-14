@@ -5,6 +5,9 @@ machine:
 dependencies:
   pre:
     - echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+  override:
+    - npm install
+    -
 
 test:
   override:
@@ -12,9 +15,9 @@ test:
     - npm run test
     - npm run build
 
-deployment:
-  beta:
-    tag: /beta-.+/
-    owner: LogRocket
-    commands:
-      - npm publish --tag $CIRCLE_TAG
+# deployment:
+#   beta:
+#     tag: /beta-.+/
+#     owner: LogRocket
+#     commands:
+#       - npm publish --tag $CIRCLE_TAG
