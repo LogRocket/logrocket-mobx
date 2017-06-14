@@ -12,9 +12,9 @@ test:
     - npm run test
     - npm run build
 
-# deployment:
-#   beta:
-#     tag: /beta-.+/
-#     owner: LogRocket
-#     commands:
-#       - npm publish --tag $CIRCLE_TAG
+deployment:
+  beta:
+    tag: /beta-.+/
+    owner: LogRocket
+    commands:
+      - npm publish --tag $CIRCLE_TAG
