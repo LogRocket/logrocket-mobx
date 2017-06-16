@@ -1,129 +1,170 @@
 import createPlugin from '../src';
-import { observe, observable } from 'mobx';
+import { observable } from 'mobx';
+import expect from 'expect.js';
+import sinon from 'sinon';
 
-
-console.log = jest.fn();
-
-const logRocket = {
-  log(...stuff) {
-    console.log.apply(null, stuff);
-  }
-};
 
 describe('logObservable', () => {
   let plugin;
   let logObservableSpy;
   let logrocketLogSpy;
 
-  beforeEach(() => {
+  before(() => {
+    const logRocket = {
+      log(...stuff) { // eslint-disable-line
+        // console.log.apply(null, stuff); // eslint-disable-line
+      }
+    };
+
     plugin = createPlugin(logRocket);
-    logObservableSpy = jest.spyOn(plugin, 'logObservable');
-    logrocketLogSpy = jest.spyOn(logRocket, 'log');
+    logObservableSpy = sinon.spy(plugin, 'logObservable');
+    logrocketLogSpy = sinon.spy(logRocket, 'log');
   });
 
   afterEach(() => {
-    logObservableSpy.mockRestore();
-    logrocketLogSpy.mockRestore();
+    logObservableSpy.reset();
+    logrocketLogSpy.reset();
   });
 
-  it('should log changes when used as a function', () => {
-    // create an observable
-    const person = observable({
-      firstName: 'John',
-      lastName: 'Doe'
+  after(() => {
+    logObservableSpy.restore();
+    logrocketLogSpy.restore();
+  });
+
+  describe('when used as a function', () => {
+    it('should log changes', () => {
+      // create an observable
+      const person = observable({
+        firstName: 'John',
+        lastName: 'Doe'
+      });
+
+      expect(person.firstName).to.eql('John');
+
+      // give the observable instance to the logger
+      plugin.logObservable(person);
+
+      // trigger a changes
+      person.firstName = 'Jack';
+
+
+      expect(person.firstName).to.eql('Jack');
+      expect(logObservableSpy.callCount).to.be(1);
+      expect(logrocketLogSpy.callCount).to.be(1);
     });
 
-    expect(person.firstName).toEqual('John');
+    it('and filter events', () => {
+      // create an observable
+      const person = observable({
+        firstName: 'John',
+        lastName: 'Doe'
+      });
 
-    // give the observable instance to the logger
-    plugin.logObservable(person);
+      expect(person.firstName).to.eql('John');
 
-    // trigger a changes
-    person.firstName = 'Jack';
+      // give the observable instance to the logger
+      plugin.logObservable(person, event => false); // eslint-disable-line
+
+      // trigger a changes
+      person.firstName = 'Jack';
 
 
-    expect(person.firstName).toEqual('Jack');
-    expect(logObservableSpy).toHaveBeenCalledTimes(1);
-    expect(logrocketLogSpy).toHaveBeenCalledTimes(1);
-
-    expect(console.log).toBeCalledWith(
-      'change',
-      {
-        name: "firstName",
-        newValue: "Jack",
-        oldValue: "John",
-        type: "update"
-      }
-    );
-  });
-
-  it('should support sanitizer when used as a function', () => {
-    // create an observable
-    const person = observable({
-      firstName: 'John',
-      lastName: 'Doe'
+      expect(person.firstName).to.eql('Jack');
+      expect(logObservableSpy.callCount).to.be(1);
+      expect(logrocketLogSpy.callCount).to.be(0);
     });
 
-    expect(person.firstName).toEqual('John');
+    it('and sanitize events', () => {
+      // create an observable
+      const person = observable({
+        firstName: 'John',
+        lastName: 'Doe'
+      });
 
-    // give the observable instance to the logger
-    plugin.logObservable(person, event => false);
+      expect(person.firstName).to.eql('John');
 
-    // trigger a changes
-    person.firstName = 'Jack';
+      // give the observable instance to the logger
+      plugin.logObservable(person, event => {
+        event.newValue = 'FOO';
+        return event;
+      }); // eslint-disable-line
+
+      // trigger a changes
+      person.firstName = 'Jack';
 
 
-    expect(person.firstName).toEqual('Jack');
-    expect(logObservableSpy).toHaveBeenCalledTimes(1);
-    expect(logrocketLogSpy).toHaveBeenCalledTimes(0);
+      expect(person.firstName).to.eql('Jack');
+      expect(logObservableSpy.callCount).to.be(1);
+      expect(logrocketLogSpy.callCount).to.be(1);
+      expect(logrocketLogSpy.firstCall.args[1].newValue).to.be('FOO');
+    });
   });
 
-  it('should log changes when used as a decorator', () => {
-    // create an observable
-    class Person {
-      @plugin.logObservable @observable firstName = 'John'
-      lastName = 'Doe'
-    }
-
-    const person = new Person();
-
-    expect(person.firstName).toEqual('John');
-
-    // trigger a changes
-    person.firstName = 'Jack';
-
-
-    expect(person.firstName).toEqual('Jack');
-    expect(logObservableSpy).toHaveBeenCalledTimes(1);
-    expect(logrocketLogSpy).toHaveBeenCalledTimes(1);
-    expect(console.log).toBeCalledWith(
-      'change',
-      {
-        type: 'update',
-        newValue: 'Jack',
-        oldValue: 'John',
-        observerName: 'Person@3.firstName'
+  describe('when used as a decorator', () => {
+    it('should log changes', () => {
+      // create an observable
+      class Person {
+        @plugin.logObservable @observable firstName = 'John'
+        lastName = 'Doe'
       }
-    );
-  });
 
-  it('should support sanitizer property as a decorator', () => {
-    // create an observable
-    const sanitizer = event => false
-    class Person {
-      @plugin.logObservable(sanitizer) @observable firstName = 'John'
-      lastName = 'Doe'
-    }
+      const person = new Person();
 
-    const person = new Person();
+      expect(person.firstName).to.eql('John');
 
-    expect(person.firstName).toEqual('John');
+      // trigger a changes
+      person.firstName = 'Jack';
 
-    // trigger a changes
-    person.firstName = 'Jack';
+      expect(person.firstName).to.eql('Jack');
+      expect(logObservableSpy.callCount).to.be(1);
+      expect(logrocketLogSpy.callCount).to.be(1);
+      expect(logrocketLogSpy.threw()).to.not.be.ok();
+      expect(logrocketLogSpy.args[0][0]).to.eql('change');
+      expect(logrocketLogSpy.args[0][1].type).to.eql('update');
+    });
 
-    expect(person.firstName).toEqual('Jack');
-    expect(logObservableSpy).toHaveBeenCalledTimes(1);
-    expect(logrocketLogSpy).toHaveBeenCalledTimes(0);
+    it('and filter events', () => {
+      // create an observable
+      const sanitizer = event => false // eslint-disable-line
+      class Person {
+        @plugin.logObservable(sanitizer) @observable firstName = 'John'
+        lastName = 'Doe'
+      }
+
+      const person = new Person();
+
+      expect(person.firstName).to.eql('John');
+
+      // trigger a changes
+      person.firstName = 'Jack';
+
+      expect(person.firstName).to.eql('Jack');
+      expect(logObservableSpy.callCount).to.be(1);
+      expect(logrocketLogSpy.callCount).to.be(0);
+    });
+
+    it('and sanitize events', () => {
+      // create an observable
+      const sanitizer = event => {
+        event.newValue = 'FOO';
+        return event;
+      };
+      class Person {
+        @plugin.logObservable(sanitizer) @observable firstName = 'John'
+        lastName = 'Doe'
+      }
+
+      const person = new Person();
+
+      expect(person.firstName).to.eql('John');
+
+      // trigger a changes
+      person.firstName = 'Jack';
+
+      expect(person.firstName).to.eql('Jack');
+      expect(logObservableSpy.callCount).to.be(1);
+      expect(logrocketLogSpy.callCount).to.be(1);
+      expect(logrocketLogSpy.firstCall.args[1].newValue).to.be('FOO');
+    });
   });
 });
