@@ -19,6 +19,10 @@ const isUndefined = value => typeof value === 'undefined';
 const isFunction = value => typeof value === 'function';
 
 export default function createPlugin(logrocket) {
+  if (isUndefined(logrocket)) {
+    throw new Error('Missing logrocket instance. Be sure you are passing LogRocket into logrocket-mobx.');
+  }
+
   const observeProperty = (target, property, sanitizer = (event => event)) => {
     invariant(isObservable(target), 'Target must be observable');
     invariant(isFunction(sanitizer) || isUndefined(sanitizer), `sanitizer property must be a function, was given a ${typeof sanitizer}`);
@@ -63,7 +67,7 @@ export default function createPlugin(logrocket) {
         // used as a decorator factory
         const sanitizer = props[0];
         return (...props) => decorate(props, sanitizer);
-      } else {
+      } else if (!isUndefined(props[0])) {
         // used as a function
         const target = props[0];
         const sanitizer = props[1];

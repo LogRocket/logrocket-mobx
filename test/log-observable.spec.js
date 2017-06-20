@@ -31,7 +31,11 @@ describe('logObservable', () => {
     logrocketLogSpy.restore();
   });
 
-  describe('when used as a function', () => {
+  it('should fail if the user incorrectly initializes the plugin', () => {
+    expect(() => createPlugin()).to.throwError();
+  });
+
+  describe('work when used as a function', () => {
     it('should log changes', () => {
       // create an observable
       const person = observable({
@@ -98,9 +102,13 @@ describe('logObservable', () => {
       expect(logrocketLogSpy.callCount).to.be(1);
       expect(logrocketLogSpy.firstCall.args[1].newValue).to.be('FOO');
     });
+
+    it('should warn when you give an unobservable value', () => {
+      expect(() => plugin.logObservable({})).to.throwError();
+    });
   });
 
-  describe('when used as a decorator', () => {
+  describe('work when used as a decorator', () => {
     it('should log changes', () => {
       // create an observable
       class Person {
@@ -165,6 +173,10 @@ describe('logObservable', () => {
       expect(logObservableSpy.callCount).to.be(1);
       expect(logrocketLogSpy.callCount).to.be(1);
       expect(logrocketLogSpy.firstCall.args[1].newValue).to.be('FOO');
+    });
+
+    it('should warn when you give an unobservable value', () => {
+      expect(() => plugin.logObservable({})).to.throwError();
     });
   });
 });
