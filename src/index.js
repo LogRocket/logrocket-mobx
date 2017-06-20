@@ -6,7 +6,7 @@ import isAccessorDescriptor from 'is-accessor-descriptor';
 
 
 const isDescriptor = value => {
-  if (!kindOf(value) === 'object') {
+  if (kindOf(value) !== 'object') {
     return false;
   }
   if ('get' in value) {
