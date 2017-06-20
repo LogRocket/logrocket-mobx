@@ -1,10 +1,22 @@
 import { observe, isObservable } from 'mobx';
 import invariant from 'invariant';
-import isDescriptor from 'is-descriptor'
+import kindOf from 'kind-of';
+import isDataDescriptor from 'is-data-descriptor';
+import isAccessorDescriptor from 'is-accessor-descriptor';
 
 
-const isUndefined = (value) => typeof value === 'undefined';
-const isFunction = (value) => typeof value === 'function';
+const isDescriptor = value => {
+  if (!kindOf(value) === 'object') {
+    return false;
+  }
+  if ('get' in value) {
+    return isAccessorDescriptor(value);
+  }
+  return isDataDescriptor(value);
+}
+
+const isUndefined = value => typeof value === 'undefined';
+const isFunction = value => typeof value === 'function';
 
 export default function createPlugin(logrocket) {
   const observeProperty = (target, property, sanitizer = (event => event)) => {

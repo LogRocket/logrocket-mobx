@@ -19,7 +19,9 @@
   },
   "dependencies": {
     "invariant": "^2.2.2",
-    "is-descriptor": "^1.0.0",
+    "is-accessor-descriptor": "^0.1.6",
+    "is-data-descriptor": "^0.1.4",
+    "kind-of": "^4.0.0",
     "mobx": "^3.1.15"
   },
   "peerDependencies": {
