@@ -1,6 +1,6 @@
 {
   "name": "logrocket-mobx",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "MobX plugin for [LogRocket](https://logrocket.com/).",
   "main": "dist/index.js",
   "author": "Logrocket <support@logrocket.com> (https://logrocket.com/)",
@@ -22,10 +22,10 @@
     "is-accessor-descriptor": "^0.1.6",
     "is-data-descriptor": "^0.1.4",
     "kind-of": "^4.0.0",
-    "mobx": "^3.1.15"
+    "mobx": "^5.0.3"
   },
   "peerDependencies": {
-    "mobx": "3.x"
+    "mobx": "5.x"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
