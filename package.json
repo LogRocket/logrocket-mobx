@@ -20,11 +20,7 @@
   },
   "dependencies": {
     "@types/invariant": "^2.2.29",
-    "install-peers": "^1.0.2",
-    "invariant": "^2.2.2",
-    "is-accessor-descriptor": "^0.1.6",
-    "is-data-descriptor": "^0.1.4",
-    "kind-of": "^4.0.0"
+    "invariant": "^2.2.2"
   },
   "peerDependencies": {
     "mobx": "5.x",
