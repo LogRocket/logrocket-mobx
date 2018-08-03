@@ -1,6 +1,6 @@
 machine:
   node:
-    version: 7.9.0
+    version: 8.3.0
 
 dependencies:
   pre:
@@ -8,7 +8,7 @@ dependencies:
 
 test:
   override:
-    - npm run lint
+    - npm run install-peers
     - npm run test
     - npm run build
 
