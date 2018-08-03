@@ -28,8 +28,8 @@ export default function createPlugin(logrocket: typeof LogRocket) {
       sanitizer?: (change: IValueDidChange<T>) => IValueDidChange<T>,
     },
   ): void {
-    const sanitizer = options ? options.sanitizer : null;
-    const name = options ? options.name : null;
+    const sanitizer = options && typeof options.sanitizer === 'function' ? options.sanitizer : null;
+    const name = options && typeof options.name !== 'undefined' ? options.name : null;
     invariant(isObservable(target), 'Target must be observable');
     invariant(
       typeof sanitizer === 'function' || sanitizer == null,
@@ -38,7 +38,7 @@ export default function createPlugin(logrocket: typeof LogRocket) {
     const nameStr = name !== null ? ` "${name}"` : '';
 
     observe(target, (change: IValueDidChange<T>) => {
-      const sanitizedChange = sanitizer ? sanitizer(change) : change;
+      const sanitizedChange = sanitizer ? sanitizer({ ...change}) : change;
       logrocket.log(`MobX value change${nameStr}:`, sanitizedChange);
     }, false);
   }
@@ -51,8 +51,8 @@ export default function createPlugin(logrocket: typeof LogRocket) {
       sanitizer?: (change: IArrayChange<T> | IArraySplice<T>) => IArrayChange<T> | IArraySplice<T>,
     }
   ): void {
-    const sanitizer = options ? options.sanitizer : null;
-    const name = options ? options.name : null;
+    const sanitizer = options && typeof options.sanitizer === 'function' ? options.sanitizer : null;
+    const name = options && typeof options.name !== 'undefined' ? options.name : null;
     invariant(isObservable(target), 'Target must be observable');
     invariant(
       typeof sanitizer === 'function' || sanitizer === null,
@@ -61,7 +61,7 @@ export default function createPlugin(logrocket: typeof LogRocket) {
     const nameStr = name !== null ? ` "${name}"` : '';
 
     observe(target, (change: IArrayChange<T> | IArraySplice<T>) => {
-      const sanitizedChange = sanitizer ? sanitizer(change) : change;
+      const sanitizedChange = sanitizer ? sanitizer({ ...change}) : change;
       logrocket.log(`MobX Array change${nameStr}:`, sanitizedChange);
     }, false);
   }
@@ -69,6 +69,7 @@ export default function createPlugin(logrocket: typeof LogRocket) {
   // observe object
   function watchObject(
     target: Object,
+    property?: string,
     options?: {
       name?: string,
       sanitizer?: (change: IObjectDidChange) => IObjectDidChange,
@@ -77,14 +78,14 @@ export default function createPlugin(logrocket: typeof LogRocket) {
   // observe object property
   function watchObject<T, K extends keyof T>(
     target: T,
-    property: K,
+    property: K | null,
     options?: {
       name?: string,
       sanitizer?: (change: IValueDidChange<T[K]> | IObjectDidChange) => IValueDidChange<T[K]> | IObjectDidChange,
     }
   ): void {
-    const sanitizer = options ? options.sanitizer : null;
-    const name = options ? options.name : null;
+    const sanitizer = options && typeof options.sanitizer === 'function' ? options.sanitizer : null;
+    const name = options && typeof options.name !== 'undefined' ? options.name : null;
     invariant(isObservable(target), 'Target must be observable');
     invariant(
       typeof sanitizer === 'function' || sanitizer === null,
@@ -92,14 +93,14 @@ export default function createPlugin(logrocket: typeof LogRocket) {
     );
     const nameStr = name !== null ? ` "${name}"` : '';
 
-    if (property !== undefined) {
+    if (typeof property === 'string') {
       observe<T, K>(target, property, (change: IValueDidChange<T[K]> | IObjectDidChange) => {
-        const sanitizedChange = sanitizer ? sanitizer(change) : change;
-        logrocket.log(`MobX Object change${nameStr}:`, sanitizedChange);
+        const sanitizedChange = sanitizer ? sanitizer({ ...change}) : change;
+        logrocket.log(`MobX Object property change${nameStr}:`, sanitizedChange);
       }, false);
     } else {
       observe(target, (change: IValueDidChange<T[K]> | IObjectDidChange) => {
-        const sanitizedChange = sanitizer ? sanitizer(change) : change;
+        const sanitizedChange = sanitizer ? sanitizer({ ...change}) : change;
         logrocket.log(`MobX Object change${nameStr}:`, sanitizedChange);
       }, false);
     }
@@ -108,6 +109,7 @@ export default function createPlugin(logrocket: typeof LogRocket) {
   // observe Map
   function watchMap<K, V>(
     target: ObservableMap<K, V>,
+    property?: K,
     options?: {
       name?: string,
       sanitizer?: (change: IMapDidChange<K, V>) => IMapDidChange<K, V>,
@@ -122,8 +124,8 @@ export default function createPlugin(logrocket: typeof LogRocket) {
       sanitizer?: (change: IValueDidChange<V> | IMapDidChange<K, V>) => IValueDidChange<V> | IMapDidChange<K, V>,
     }
   ): void {
-    const sanitizer = options ? options.sanitizer : null;
-    const name = options ? options.name : null;
+    const sanitizer = options && typeof options.sanitizer === 'function' ? options.sanitizer : null;
+    const name = options && typeof options.name !== 'undefined' ? options.name : null;
     invariant(isObservable(target), 'Target must be observable');
     invariant(
       typeof sanitizer === 'function' || sanitizer === null,
@@ -131,14 +133,14 @@ export default function createPlugin(logrocket: typeof LogRocket) {
     );
     const nameStr = name !== null ? ` "${name}"` : '';
 
-    if (property !== undefined) {
+    if (typeof property !== 'undefined' && property !== null) {
       observe<K, V>(target, property, (change: IValueDidChange<V>) => {
-        const sanitizedChange = sanitizer ? sanitizer(change) : change;
-        logrocket.log(`MobX Map change${nameStr}:`, sanitizedChange);
+        const sanitizedChange = sanitizer ? sanitizer({ ...change}) : change;
+        logrocket.log(`MobX Map property change${nameStr}:`, sanitizedChange);
       }, false);
     } else {
       observe<K, V>(target, (change: IMapDidChange<K, V>) => {
-        const sanitizedChange = sanitizer ? sanitizer(change) : change;
+        const sanitizedChange = sanitizer ? sanitizer({ ...change}) : change;
         logrocket.log(`MobX Map change${nameStr}:`, sanitizedChange);
       }, false);
     }
