@@ -8,6 +8,7 @@ dependencies:
 
 test:
   override:
+    - npm run install-peers
     - npm run test
     - npm run build
 
