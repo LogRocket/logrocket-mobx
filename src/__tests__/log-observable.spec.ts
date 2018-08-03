@@ -120,7 +120,6 @@ describe('logrocket-mobx', () => {
       value.set('bar', 123);
       const calls = (LogRocket.log as jest.Mock).mock.calls;
       expect(calls.length).toBe(1);
-      console.log(calls);
       expect(calls[0][0]).toBe('MobX Map property change:');
       expect(calls[0][1].oldValue).toBe(1);
       expect(calls[0][1].newValue).toBe(3);
