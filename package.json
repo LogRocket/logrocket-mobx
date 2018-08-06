@@ -1,6 +1,6 @@
 {
   "name": "logrocket-mobx",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "MobX plugin for [LogRocket](https://logrocket.com/).",
   "main": "dist/index",
   "typings": "dist/types",
